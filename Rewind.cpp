@@ -3,7 +3,7 @@
 #include "Rewind.h"
 #include "GameFramework/Actor.h"
 
-const float URewind::s_fREFRESH_RATE = 1.0f / 120.0f;
+const float URewind::s_fREFRESH_RATE = 1.0f / 30.0f;
 
 float URewind::s_fDeltaTime = 0.0f;
 float URewind::s_fSpeedModifier = 1.0f;
@@ -100,13 +100,19 @@ void URewind::TickComponent(float fDeltaTime, ELevelTick TickType, FActorCompone
 		if (s_fSpeedModifier < 1.0f) s_fSpeedModifier += s_fREFRESH_RATE;
 		else s_fSpeedModifier = 1.0f;
 	}
-	--s_ui16ObjectIterator; // This makes sure that the loop above runs only once per tick if multiple objects are inthe scene.
+	--s_ui16ObjectIterator; // This makes sure that the loop above runs only once per tick if multiple objects are in the scene.
 
-	if (s_bIsRewindActive && m_pPARENTACTOR->GetActorLocation() != m_arrTrackedLocation[s_ui16HeadLocation])	// After incrementing set new position.
+	if (s_bIsRewindActive)	// After incrementing set new position.
+	//if (s_bIsRewindActive && m_pPARENTACTOR->GetActorLocation() != m_arrTrackedLocation[s_ui16HeadLocation])	// After incrementing set new position.
 	{
+		if (m_pPARENTACTOR->GetActorLocation() == m_arrTrackedLocation[s_ui16HeadLocation] && m_pPARENTACTOR->GetActorQuat() == m_arrTrackedRotation[s_ui16HeadLocation])
+		{} // This sould remove jumps by getting the inbetween locations. if && remaining rewind > 0
+		else
+		{
 		m_pPARENTACTOR->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 		m_pPARENTACTOR->SetActorLocationAndRotation(m_arrTrackedLocation[s_ui16HeadLocation], m_arrTrackedRotation[s_ui16HeadLocation], false, nullptr, ETeleportType::TeleportPhysics);
-	}	
+		}
+	}
 	else // Record new position after decrementing.
 	{
 		m_arrTrackedLocation[s_ui16HeadLocation] = m_pPARENTACTOR->GetActorLocation();
